@@ -1,31 +1,18 @@
-# cv-projeto-grupo ó "A cena reage ao movimento"
+# CV Projeto Grupo 
+Projeto da disciplina de Computa√ß√£o Visual da Universidade do Algarve. 
+## Grupo 
+- Laura Kayamori
+- Maria Eduarda Pereira
+- Nicolas Takuma
 
-ComputaÁ„o Visual 2026/27 ∑ LESTI ∑ ISE, Universidade do Algarve
+## Objetivo 
+Desenvolver uma cena interativa que reage ao movimento detetado pela webcam utilizando OpenCV e Blender. 
 
-## Tema
+## Pastas 
+- blender 
+- src 
+- dados 
+- evidencias 
 
-(descrever aqui o tema escolhido do grupo)
-
-## Tabela das zonas
-
-| Zona | Objeto (reactivo) | AnimaÁ„o (48 frames) | Modelado por |
-|------|-------------------|----------------------|--------------|
-| Esquerda | zona1_cadeira | baloiÁo | ó |
-| Centro | zona2_copo | rodopia | ó |
-| Direita | zona3_prato | salto | ó |
-
-## Como correr
-
-    pip install -r src/requirements.txt
-    python src/main.py
-
-## Uso de IA na escrita de cÛdigo
-
-(declarar aqui o que foi usado e onde, conforme a regra da FUC)
-
-## Regras do Git para .blend
-
-- Um .blend por objeto, um respons·vel por ficheiro.
-- git pull antes de abrir um .blend; git push quando terminar.
-- Nunca editar o mesmo .blend em simult‚neo (bin·rio, n„o d· merge).
-- Gravar sempre em Blender 5.2 LTS com Data > Pack Resources.
+## Execu√ß√£o 
+python src/main.py
