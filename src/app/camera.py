@@ -22,8 +22,8 @@ class CameraCapture:
         if not capture.isOpened():
             capture.release()
             raise RuntimeError(f"Webcam {self.index} indisponível. Experimenta --camera 1.")
-        capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        capture.set(cv2.CAP_PROP_FRAME_WIDTH, 960)
+        capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 540)
         self.capture = capture
 
     def read(self) -> tuple[bool, np.ndarray | None]:
