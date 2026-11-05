@@ -26,10 +26,10 @@ class AnimationRenderer:
             if zone_index == 0:
                 if obj_index == 0:
                     position = (center[0] - 40, center[1])
-                    side = 145
+                    side = 200
                 else:
                     position = (center[0] + 52, center[1])
-                    side = 95
+                    side = 200
                 speed = 24
             elif zone_index == 1:
                 position = center
@@ -38,10 +38,10 @@ class AnimationRenderer:
             else:
                 if obj_index == 0:
                     position = (center[0] - 38, center[1])
-                    side = 135
+                    side = 150
                 else:
                     position = (center[0] + 43, center[1])
-                    side = 105
+                    side = 120
                 if direction > 0:
                     speed = 35
                 elif direction < 0:
