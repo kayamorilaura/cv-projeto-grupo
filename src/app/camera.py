@@ -7,11 +7,14 @@ import numpy as np
 
 
 class CameraCapture:
+    """Manage the webcam and return horizontally mirrored frames."""
+
     def __init__(self, index: int) -> None:
         self.index = index
         self.capture: cv2.VideoCapture | None = None
 
     def open(self) -> None:
+        """Open the webcam with a fallback backend and request a frame size."""
         if hasattr(cv2, "CAP_DSHOW"):
             capture = cv2.VideoCapture(self.index, cv2.CAP_DSHOW)
         else:
@@ -27,6 +30,7 @@ class CameraCapture:
         self.capture = capture
 
     def read(self) -> tuple[bool, np.ndarray | None]:
+        """Read and mirror a frame, or report an unsuccessful capture."""
         if self.capture is None:
             raise RuntimeError("Camera is not open")
         ok, frame = self.capture.read()
@@ -35,6 +39,7 @@ class CameraCapture:
         return True, cv2.flip(frame, 1)
 
     def release(self) -> None:
+        """Release the webcam if it is open."""
         if self.capture is not None:
             self.capture.release()
             self.capture = None

@@ -18,6 +18,8 @@ from app.zones import ZoneManager
 
 
 class VisualApplication:
+    """Coordinate capture, detection, rendering, and evidence recording."""
+
     def __init__(self, config: AppConfig) -> None:
         self.config = config
         self.logger = AppLogger()
@@ -27,6 +29,7 @@ class VisualApplication:
         self.asset_loader = AssetLoader(config.assets_dir, config.zone_sprites, self.logger)
 
     def run(self) -> None:
+        """Run the camera loop and release resources when it ends."""
         assets = self.asset_loader.load()
         renderer = AnimationRenderer(assets)
         recorder = EvidenceRecorder(
@@ -68,6 +71,7 @@ class VisualApplication:
                 for index, name in enumerate(self.zone_manager.names):
                     self.zone_manager.draw_zone(output, index)
 
+                    # Ignore detections during background warmup.
                     if frame_no > self.config.warmup and by_zone[index]:
                         x, y, bw, bh = max(by_zone[index], key=lambda box: box[2] * box[3])
                         center = (x + bw // 2, y + bh // 2)
@@ -123,6 +127,7 @@ class VisualApplication:
                 if key == ord("s"):
                     recorder.screenshot(output)
         finally:
+            # Finalize events before closing capture and recording resources.
             now = monotonic()
             try:
                 events.finish(now)

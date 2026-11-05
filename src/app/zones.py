@@ -7,6 +7,8 @@ import numpy as np
 
 
 class ZoneManager:
+    """Assign motion boxes to zones and draw their overlays."""
+
     def __init__(
         self,
         names: tuple[str, ...],
@@ -16,6 +18,7 @@ class ZoneManager:
         self.colors = colors
 
     def zone_for_x(self, x: int, width: int) -> int:
+        """Map a horizontal coordinate to one of the three zones."""
         return min(2, max(0, x * 3 // width))
 
     def group_boxes(
@@ -23,6 +26,7 @@ class ZoneManager:
         boxes: list[tuple[int, int, int, int]],
         width: int,
     ) -> list[list[list[int]]]:
+        """Group bounding boxes by the zone containing their center."""
         by_zone: list[list[list[int]]] = [[], [], []]
         for x, y, bw, bh in boxes:
             center_x = x + bw // 2
@@ -31,6 +35,7 @@ class ZoneManager:
         return by_zone
 
     def draw_zone(self, output: np.ndarray, index: int) -> None:
+        """Draw a zone boundary and label on the output frame."""
         h, w = output.shape[:2]
         start_x, end_x = index * w // 3, (index + 1) * w // 3
         color = self.colors[index]
@@ -48,6 +53,7 @@ class ZoneManager:
         )
 
     def draw_boxes(self, output: np.ndarray, index: int, boxes: list[list[int]]) -> None:
+        """Draw motion boxes using the zone's color."""
         for x, y, bw, bh in boxes:
             cv2.rectangle(
                 output,

@@ -12,6 +12,8 @@ from app.logger import AppLogger
 
 
 class EvidenceRecorder:
+    """Manage timestamped video, event, and screenshot paths."""
+
     def __init__(self, root: Path, folder: Path, fps: float, logger: AppLogger) -> None:
         self.root = root
         self.folder = folder
@@ -24,6 +26,7 @@ class EvidenceRecorder:
         self.writer: cv2.VideoWriter | None = None
 
     def start_if_needed(self, width: int, height: int) -> None:
+        """Open the MP4 writer once the frame dimensions are known."""
         if self.writer is not None:
             return
         writer = cv2.VideoWriter(
@@ -41,17 +44,20 @@ class EvidenceRecorder:
         self.logger.info(f"Vídeo: {self.video_path.relative_to(self.root)}", "green")
 
     def write(self, frame: np.ndarray) -> None:
+        """Append a frame to the open video."""
         if self.writer is None:
             raise RuntimeError("Recorder is not open")
         self.writer.write(frame)
 
     def screenshot(self, frame: np.ndarray) -> Path:
+        """Save a timestamped PNG and return its path."""
         path = self.folder / f"captura_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
         cv2.imwrite(str(path), frame)
         self.logger.info(f"Captura: {path.relative_to(self.root)}", "green")
         return path
 
     def close(self) -> None:
+        """Release the video writer if it is open."""
         if self.writer is not None:
             self.writer.release()
             self.writer = None

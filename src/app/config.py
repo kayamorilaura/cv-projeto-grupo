@@ -9,6 +9,8 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class AppConfig:
+    """Store application paths, detection settings, and zone mappings."""
+
     root: Path
     camera_index: int = 0
     min_area: int = 700
@@ -28,14 +30,17 @@ class AppConfig:
 
     @property
     def assets_dir(self) -> Path:
+        """Return the directory containing object animation folders."""
         return self.root / "assets"
 
     @property
     def evidence_dir(self) -> Path:
+        """Return the directory for videos, screenshots, and event files."""
         return self.root / "evidencias"
 
     @classmethod
     def from_cli(cls, root: Path, argv: list[str] | None = None) -> AppConfig:
+        """Build configuration from command-line options and the project root."""
         parser = argparse.ArgumentParser(description="Cena interativa Blender + OpenCV")
         parser.add_argument("--camera", type=int, default=0, help="Índice da webcam (0, 1, ...)")
         parser.add_argument("--min-area", type=int, default=700, help="Área mínima de contorno em px²")

@@ -7,6 +7,8 @@ import numpy as np
 
 
 class AnimationRenderer:
+    """Select and compose animated sprites for each zone."""
+
     def __init__(self, assets: dict[str, list[np.ndarray]]) -> None:
         self.assets = assets
 
@@ -20,9 +22,11 @@ class AnimationRenderer:
         direction: int,
         play_time: float,
     ) -> None:
+        """Choose each object's position, size, and animation frame."""
         for obj_index, name in enumerate(objects):
             images = self.assets[name]
 
+            # Each zone has its own layout and animation response.
             if zone_index == 0:
                 if obj_index == 0:
                     position = (center[0] - 40, center[1])
@@ -59,6 +63,7 @@ class AnimationRenderer:
         center: tuple[int, int],
         side: int,
     ) -> None:
+        """Blend a resized sprite into the visible part of the frame in place."""
         side = max(40, int(side))
         h0, w0 = sprite.shape[:2]
         dest_w = side
@@ -69,12 +74,14 @@ class AnimationRenderer:
         x = round(center[0] - dest_w / 2)
         y = round(center[1] - dest_h / 2)
 
+        # Clip sprites that extend beyond the frame edges.
         xa, ya = max(0, x), max(0, y)
         xb, yb = min(w, x + dest_w), min(h, y + dest_h)
         if xa >= xb or ya >= yb:
             return
 
         crop = image[ya - y:yb - y, xa - x:xb - x]
+        # The alpha channel controls the mix of foreground and background.
         alpha = crop[:, :, 3:4].astype(np.float32) / 255.0
         background = frame[ya:yb, xa:xb].astype(np.float32)
         foreground = crop[:, :, :3].astype(np.float32)

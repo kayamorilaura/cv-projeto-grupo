@@ -10,6 +10,8 @@ from app.logger import AppLogger
 
 
 class EventTracker:
+    """Track active motion per zone and persist completed events."""
+
     def __init__(
         self,
         path: Path,
@@ -39,6 +41,7 @@ class EventTracker:
         now: float,
         video_seconds: float,
     ) -> tuple[float, int]:
+        """Start or update an event and return animation time and direction."""
         self.last_seen[zone] = now
 
         if self.active[zone] is None:
@@ -53,6 +56,7 @@ class EventTracker:
             self.logger.info(f"Movimento: zona {zone+1} ({zone_name})", "yellow")
 
         event = self.active[zone]
+        # Limit the samples and boxes stored for each event.
         if len(event["bounding_boxes"]) < 25:
             event["bounding_boxes"].append({
                 "tempo_video_segundos": round(video_seconds, 2),
@@ -74,10 +78,12 @@ class EventTracker:
         return play_time, direction
 
     def expire_zone(self, zone: int, now: float) -> None:
+        """End an event after its zone has been inactive for the hold period."""
         if self.active[zone] is not None and now - self.last_seen[zone] > self.hold_seconds:
             self.end_event(zone, now)
 
     def end_event(self, zone: int, now: float) -> None:
+        """Finalize one active event, persist it, and clear its zone state."""
         event = self.active[zone]
         if event is None:
             return
@@ -93,11 +99,13 @@ class EventTracker:
         self.last_centroid[zone] = None
 
     def finish(self, now: float) -> None:
+        """Finalize all events still active when the application stops."""
         for zone in range(len(self.active)):
             if self.active[zone] is not None:
                 self.end_event(zone, now)
 
     def _write_events(self) -> None:
+        """Replace the JSON file with the current completed-event list."""
         temp = self.path.with_suffix(".tmp")
         temp.write_text(json.dumps(self.events, ensure_ascii=False, indent=2), encoding="utf-8")
         temp.replace(self.path)

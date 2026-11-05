@@ -11,6 +11,8 @@ from app.logger import AppLogger
 
 
 class AssetLoader:
+    """Load each configured object's PNG sequence into memory."""
+
     def __init__(
         self,
         folder: Path,
@@ -22,8 +24,10 @@ class AssetLoader:
         self.logger = logger
 
     def load(self) -> dict[str, list[np.ndarray]]:
+        """Return sorted four-channel frames grouped by object name."""
         animations: dict[str, list[np.ndarray]] = {}
 
+        # Preserve object order while avoiding duplicate loads across zones.
         for name in dict.fromkeys(n for group in self.zone_sprites.values() for n in group):
             folder = self.folder / name
             paths = sorted(folder.glob("*.png"))
