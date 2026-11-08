@@ -6,16 +6,14 @@ from time import monotonic
 
 import cv2
 
-from app.animations import render_zone
-from app.assets import load_animations
+from app.animations import load_animations, render_zone
 from app.camera import open_camera, read_camera
 from app.events import create_event_tracker, expire_zone, finish_events, record_motion
 from app.logger import log
-from app.motion import create_motion_detector, detect_motion
 from app.recorder import (
     close_recorder, create_recorder, save_screenshot, start_recording, write_frame,
 )
-from app.zones import draw_boxes, draw_zone, group_boxes
+from app.vision import create_motion_detector, detect_motion, draw_boxes, draw_zone, group_boxes
 
 
 def update_zones(output, by_zone, frame_no, config, events, assets, now, video_seconds):
