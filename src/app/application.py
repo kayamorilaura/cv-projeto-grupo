@@ -12,9 +12,9 @@ from app.camera import CameraCapture
 from app.config import AppConfig
 from app.events import EventTracker
 from app.logger import AppLogger
-from app.motion import MotionDetector
+from app.motion import create_motion_detector, detect_motion
 from app.recorder import EvidenceRecorder
-from app.zones import ZoneManager
+from app.zones import draw_boxes, draw_zone, group_boxes
 
 
 class VisualApplication:
@@ -24,8 +24,7 @@ class VisualApplication:
         self.config = config
         self.logger = AppLogger()
         self.camera = CameraCapture(config.camera_index)
-        self.motion_detector = MotionDetector(config.min_area)
-        self.zone_manager = ZoneManager(tuple(config.zone_sprites), config.zone_colors)
+        self.subtractor, self.motion_kernel = create_motion_detector()
         self.asset_loader = AssetLoader(config.assets_dir, config.zone_sprites, self.logger)
 
     def run(self) -> None:
@@ -64,12 +63,15 @@ class VisualApplication:
                 duration_so_far = now - starting_time
                 frame_no += 1
 
-                boxes = self.motion_detector.detect(camera_frame)
-                by_zone = self.zone_manager.group_boxes(boxes, width)
+                boxes = detect_motion(
+                    camera_frame, self.subtractor, self.motion_kernel, self.config.min_area
+                )
+                by_zone = group_boxes(boxes, width)
                 output = camera_frame.copy()
 
-                for index, name in enumerate(self.zone_manager.names):
-                    self.zone_manager.draw_zone(output, index)
+                for index, name in enumerate(self.config.zone_sprites):
+                    color = self.config.zone_colors[index]
+                    draw_zone(output, index, name, color)
 
                     # Ignore detections during background warmup.
                     if frame_no > self.config.warmup and by_zone[index]:
@@ -96,7 +98,7 @@ class VisualApplication:
 
                     events.expire_zone(index, now)
                     if frame_no > self.config.warmup:
-                        self.zone_manager.draw_boxes(output, index, by_zone[index])
+                        draw_boxes(output, by_zone[index], color)
 
                 if frame_no <= self.config.warmup:
                     cv2.putText(
