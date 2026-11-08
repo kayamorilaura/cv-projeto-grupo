@@ -8,7 +8,7 @@ import cv2
 
 from app.animations import render_zone
 from app.assets import load_animations
-from app.camera import CameraCapture
+from app.camera import open_camera, read_camera
 from app.config import AppConfig
 from app.events import create_event_tracker, expire_zone, finish_events, record_motion
 from app.logger import AppLogger
@@ -58,7 +58,6 @@ def update_zones(output, by_zone, frame_no, config, events, assets, now, video_s
 def run_application(config: AppConfig) -> None:
     """Run the camera loop and release resources when it ends."""
     logger = AppLogger()
-    camera = CameraCapture(config.camera_index)
     subtractor, motion_kernel = create_motion_detector()
     assets = load_animations(config.assets_dir, config.zone_sprites, logger)
     recorder = create_recorder(
@@ -76,13 +75,13 @@ def run_application(config: AppConfig) -> None:
         logger=logger,
     )
 
-    camera.open()
+    camera = open_camera(config.camera_index)
     frame_no = 0
     starting_time = monotonic()
 
     try:
         while True:
-            ok, camera_frame = camera.read()
+            ok, camera_frame = read_camera(camera)
             if not ok:
                 logger.info("Webcam deixou de fornecer frames; a terminar.", "yellow")
                 break
