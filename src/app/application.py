@@ -10,7 +10,7 @@ from app.animations import render_zone
 from app.assets import load_animations
 from app.camera import CameraCapture
 from app.config import AppConfig
-from app.events import EventTracker
+from app.events import create_event_tracker, expire_zone, finish_events, record_motion
 from app.logger import AppLogger
 from app.motion import create_motion_detector, detect_motion
 from app.recorder import EvidenceRecorder
@@ -35,7 +35,7 @@ class VisualApplication:
             self.config.fps,
             self.logger,
         )
-        events = EventTracker(
+        events = create_event_tracker(
             recorder.json_path,
             recorder.video_path,
             self.config.root,
@@ -76,7 +76,8 @@ class VisualApplication:
                         x, y, bw, bh = max(by_zone[index], key=lambda box: box[2] * box[3])
                         center = (x + bw // 2, y + bh // 2)
 
-                        play_time, direction = events.record_motion(
+                        play_time, direction = record_motion(
+                            events,
                             index,
                             name,
                             by_zone[index],
@@ -95,7 +96,7 @@ class VisualApplication:
                             play_time,
                         )
 
-                    events.expire_zone(index, now)
+                    expire_zone(events, index, now)
                     if frame_no > self.config.warmup:
                         draw_boxes(output, by_zone[index], color)
 
@@ -131,13 +132,13 @@ class VisualApplication:
             # Finalize events before closing capture and recording resources.
             now = monotonic()
             try:
-                events.finish(now)
+                finish_events(events, now)
             finally:
                 self.camera.release()
                 recorder.close()
                 cv2.destroyAllWindows()
             self.logger.info(
-                f"Terminado. {len(events.events)} eventos em "
+                f"Terminado. {len(events['events'])} eventos em "
                 f"{recorder.json_path.relative_to(self.config.root)}",
                 "green",
             )
