@@ -7,13 +7,12 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from app.logger import AppLogger
+from app.logger import log
 
 
 def load_animations(
     folder: Path,
     zone_sprites: dict[str, tuple[str, ...]],
-    logger: AppLogger,
 ) -> dict[str, list[np.ndarray]]:
     """Load sorted four-channel frames for each configured object."""
     animations: dict[str, list[np.ndarray]] = {}
@@ -37,6 +36,6 @@ def load_animations(
             frames.append(image)
 
         animations[name] = frames
-        logger.info(f"{name}: {len(frames)} frames RGBA")
+        log(f"{name}: {len(frames)} frames RGBA")
 
     return animations

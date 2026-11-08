@@ -8,10 +8,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from app.logger import AppLogger
+from app.logger import log
 
 
-def create_recorder(root: Path, folder: Path, fps: float, logger: AppLogger) -> dict:
+def create_recorder(root: Path, folder: Path, fps: float) -> dict:
     """Prepare the timestamped paths and recording state."""
     folder.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -19,7 +19,6 @@ def create_recorder(root: Path, folder: Path, fps: float, logger: AppLogger) -> 
         "root": root,
         "folder": folder,
         "fps": fps,
-        "logger": logger,
         "video_path": folder / f"video_{stamp}.mp4",
         "json_path": folder / f"deteccoes_{stamp}.json",
         "writer": None,
@@ -43,7 +42,7 @@ def start_recording(recorder: dict, width: int, height: int) -> None:
         )
     recorder["writer"] = writer
     relative_path = recorder["video_path"].relative_to(recorder["root"])
-    recorder["logger"].info(f"Vídeo: {relative_path}", "green")
+    log(f"Vídeo: {relative_path}", "green")
 
 
 def write_frame(recorder: dict, frame: np.ndarray) -> None:
@@ -58,7 +57,7 @@ def save_screenshot(recorder: dict, frame: np.ndarray) -> Path:
     stamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     path = recorder["folder"] / f"captura_{stamp}.png"
     cv2.imwrite(str(path), frame)
-    recorder["logger"].info(f"Captura: {path.relative_to(recorder['root'])}", "green")
+    log(f"Captura: {path.relative_to(recorder['root'])}", "green")
     return path
 
 

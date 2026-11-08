@@ -8,19 +8,13 @@ except ImportError:
     Console = None
 
 
-class AppLogger:
-    """Print timestamped messages with optional Rich styling."""
+console = Console() if Console is not None else None
 
-    def __init__(self) -> None:
-        if Console is not None:
-            self.console = Console()
-        else:
-            self.console = None
 
-    def info(self, message: str, style: str = "cyan") -> None:
-        """Print a message, using the requested style when Rich is available."""
-        line = f"[{datetime.now().strftime('%H:%M:%S')}] {message}"
-        if self.console is not None:
-            self.console.print(line, style=style)
-        else:
-            print(line)
+def log(message: str, style: str = "cyan") -> None:
+    """Print a timestamped message, using Rich styling when available."""
+    line = f"[{datetime.now().strftime('%H:%M:%S')}] {message}"
+    if console is not None:
+        console.print(line, style=style)
+    else:
+        print(line)

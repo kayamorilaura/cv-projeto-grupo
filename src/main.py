@@ -11,11 +11,11 @@
 from pathlib import Path
 
 from app.application import run_application
-from app.config import AppConfig
+from app.config import load_config
 
 
 def main() -> None:
-    config = AppConfig.from_cli(Path(__file__).resolve().parents[1])
+    config = load_config(Path(__file__).resolve().parents[1])
     run_application(config)
 
 

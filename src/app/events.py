@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from app.logger import AppLogger
+from app.logger import log
 
 
 def create_event_tracker(
@@ -15,7 +15,6 @@ def create_event_tracker(
     root: Path,
     zone_count: int,
     hold_seconds: float,
-    logger: AppLogger,
 ) -> dict:
     """Create the event state for each zone and initialize the JSON file."""
     zones = []
@@ -27,7 +26,6 @@ def create_event_tracker(
         "video_path": video_path,
         "root": root,
         "hold_seconds": hold_seconds,
-        "logger": logger,
         "events": [],
         "zones": zones,
     }
@@ -57,7 +55,7 @@ def record_motion(
             "bounding_boxes": [],
             "_start_mono": now,
         }
-        tracker["logger"].info(f"Movimento: zona {zone+1} ({zone_name})", "yellow")
+        log(f"Movimento: zona {zone+1} ({zone_name})", "yellow")
 
     event = state["event"]
     if len(event["bounding_boxes"]) < 25:
@@ -95,7 +93,7 @@ def end_event(tracker: dict, zone: int, now: float) -> None:
     event["duracao_segundos"] = round(max(0.0, now - event.pop("_start_mono")), 2)
     tracker["events"].append(event)
     write_events(tracker)
-    tracker["logger"].info(
+    log(
         f"Zona {event['zona']}: evento gravado ({event['duracao_segundos']} s)",
         "green",
     )
