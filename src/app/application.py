@@ -13,7 +13,9 @@ from app.config import AppConfig
 from app.events import create_event_tracker, expire_zone, finish_events, record_motion
 from app.logger import AppLogger
 from app.motion import create_motion_detector, detect_motion
-from app.recorder import EvidenceRecorder
+from app.recorder import (
+    close_recorder, create_recorder, save_screenshot, start_recording, write_frame,
+)
 from app.zones import draw_boxes, draw_zone, group_boxes
 
 
@@ -29,15 +31,15 @@ class VisualApplication:
     def run(self) -> None:
         """Run the camera loop and release resources when it ends."""
         assets = load_animations(self.config.assets_dir, self.config.zone_sprites, self.logger)
-        recorder = EvidenceRecorder(
+        recorder = create_recorder(
             self.config.root,
             self.config.evidence_dir,
             self.config.fps,
             self.logger,
         )
         events = create_event_tracker(
-            recorder.json_path,
-            recorder.video_path,
+            recorder['json_path'],
+            recorder['video_path'],
             self.config.root,
             zone_count=3,
             hold_seconds=self.config.hold_seconds,
@@ -56,7 +58,7 @@ class VisualApplication:
                     break
 
                 height, width = camera_frame.shape[:2]
-                recorder.start_if_needed(width, height)
+                start_recording(recorder, width, height)
                 now = monotonic()
                 duration_so_far = now - starting_time
                 frame_no += 1
@@ -120,14 +122,14 @@ class VisualApplication:
                     2,
                 )
 
-                recorder.write(output)
+                write_frame(recorder, output)
                 cv2.imshow("Computacao Visual - OpenCV / Blender", output)
 
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("q"):
                     break
                 if key == ord("s"):
-                    recorder.screenshot(output)
+                    save_screenshot(recorder, output)
         finally:
             # Finalize events before closing capture and recording resources.
             now = monotonic()
@@ -135,10 +137,10 @@ class VisualApplication:
                 finish_events(events, now)
             finally:
                 self.camera.release()
-                recorder.close()
+                close_recorder(recorder)
                 cv2.destroyAllWindows()
             self.logger.info(
                 f"Terminado. {len(events['events'])} eventos em "
-                f"{recorder.json_path.relative_to(self.config.root)}",
+                f"{recorder['json_path'].relative_to(self.config.root)}",
                 "green",
             )
