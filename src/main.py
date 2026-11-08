@@ -10,13 +10,13 @@
 
 from pathlib import Path
 
-from app.application import VisualApplication
+from app.application import run_application
 from app.config import AppConfig
 
 
 def main() -> None:
     config = AppConfig.from_cli(Path(__file__).resolve().parents[1])
-    VisualApplication(config).run()
+    run_application(config)
 
 
 if __name__ == "__main__":
