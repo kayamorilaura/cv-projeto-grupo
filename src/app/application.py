@@ -6,8 +6,8 @@ from time import monotonic
 
 import cv2
 
-from app.animations import AnimationRenderer
-from app.assets import AssetLoader
+from app.animations import render_zone
+from app.assets import load_animations
 from app.camera import CameraCapture
 from app.config import AppConfig
 from app.events import EventTracker
@@ -25,12 +25,10 @@ class VisualApplication:
         self.logger = AppLogger()
         self.camera = CameraCapture(config.camera_index)
         self.subtractor, self.motion_kernel = create_motion_detector()
-        self.asset_loader = AssetLoader(config.assets_dir, config.zone_sprites, self.logger)
 
     def run(self) -> None:
         """Run the camera loop and release resources when it ends."""
-        assets = self.asset_loader.load()
-        renderer = AnimationRenderer(assets)
+        assets = load_animations(self.config.assets_dir, self.config.zone_sprites, self.logger)
         recorder = EvidenceRecorder(
             self.config.root,
             self.config.evidence_dir,
@@ -86,7 +84,8 @@ class VisualApplication:
                             now,
                             duration_so_far,
                         )
-                        renderer.render_zone(
+                        render_zone(
+                            assets,
                             output,
                             index,
                             self.config.zone_sprites[name],
