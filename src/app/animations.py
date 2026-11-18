@@ -1,0 +1,119 @@
+"""Load and render the transparent animations for each zone."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import cv2
+import numpy as np
+
+from app.logger import log
+
+
+def load_animations(
+    folder: Path,
+    zone_sprites: dict[str, tuple[str, ...]],
+) -> dict[str, list[np.ndarray]]:
+    """Load sorted four-channel frames for each configured object."""
+    animations: dict[str, list[np.ndarray]] = {}
+    names: list[str] = []
+    for objects in zone_sprites.values():
+        for name in objects:
+            if name not in names:
+                names.append(name)
+
+    for name in names:
+        object_folder = folder / name
+        paths = sorted(object_folder.glob("*.png"))
+        if not paths:
+            raise FileNotFoundError(f"Sem PNGs em {object_folder}. Corre 'git pull' na raiz.")
+
+        frames: list[np.ndarray] = []
+        for path in paths:
+            image = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+            if image is None or image.ndim != 3 or image.shape[2] != 4:
+                raise ValueError(f"PNG sem canal alfa RGBA válido: {path}")
+            frames.append(image)
+
+        animations[name] = frames
+        log(f"{name}: {len(frames)} frames RGBA")
+
+    return animations
+
+
+def render_zone(
+    assets: dict[str, list[np.ndarray]],
+    output: np.ndarray,
+    zone_index: int,
+    objects: tuple[str, ...],
+    center: tuple[int, int],
+    extent: int,
+    direction: int,
+    play_time: float,
+) -> None:
+    """Choose each object's position, size, and animation frame."""
+    for obj_index, name in enumerate(objects):
+        images = assets[name]
+
+        # Each zone has its own layout and animation response.
+        if zone_index == 0:
+            if obj_index == 0:
+                position = (center[0] - 40, center[1])
+                side = 200
+            else:
+                position = (center[0] + 52, center[1])
+                side = 200
+            speed = 24
+        elif zone_index == 1:
+            position = center
+            side = min(235, max(100, int(extent * 0.95)))
+            speed = 24
+        else:
+            if obj_index == 0:
+                position = (center[0] - 38, center[1])
+                side = 150
+            else:
+                position = (center[0] + 43, center[1])
+                side = 120
+            if direction > 0:
+                speed = 35
+            elif direction < 0:
+                speed = 12
+            else:
+                speed = 24
+
+        frame_id = int(play_time * speed) % len(images)
+        overlay_rgba(output, images[frame_id], position, side)
+
+
+def overlay_rgba(
+    frame: np.ndarray,
+    sprite: np.ndarray,
+    center: tuple[int, int],
+    side: int,
+) -> None:
+    """Blend a resized sprite into the visible part of the frame in place."""
+    side = max(40, int(side))
+    h0, w0 = sprite.shape[:2]
+    dest_w = side
+    dest_h = max(1, round(side * h0 / w0))
+    image = cv2.resize(sprite, (dest_w, dest_h), interpolation=cv2.INTER_AREA)
+
+    h, w = frame.shape[:2]
+    x = round(center[0] - dest_w / 2)
+    y = round(center[1] - dest_h / 2)
+
+    # Clip sprites that extend beyond the frame edges.
+    xa, ya = max(0, x), max(0, y)
+    xb, yb = min(w, x + dest_w), min(h, y + dest_h)
+    if xa >= xb or ya >= yb:
+        return
+
+    crop = image[ya - y:yb - y, xa - x:xb - x]
+    # The alpha channel controls the mix of foreground and background.
+    alpha = crop[:, :, 3:4].astype(np.float32) / 255.0
+    background = frame[ya:yb, xa:xb].astype(np.float32)
+    foreground = crop[:, :, :3].astype(np.float32)
+    frame[ya:yb, xa:xb] = np.clip(
+        foreground * alpha + background * (1.0 - alpha), 0, 255
+    ).astype(np.uint8)
