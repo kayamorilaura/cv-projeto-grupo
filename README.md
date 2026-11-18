@@ -7,7 +7,6 @@ Blender sobre a imagem da câmara.
 ## Grupo
 
 - Laura Kayamori
-- Maria Eduarda Pereira
 - Nicolas Takuma
 - Fernando Davila
 
