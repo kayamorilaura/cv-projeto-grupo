@@ -23,11 +23,11 @@ Blender sobre a imagem da câmara.
 
 ## Zonas e reações
 
-| Zona | Objetos | Reação na aplicação | Autoria dos modelos |
-|---|---|---|---|
-| Esquerda | Cadeira e vaso | Os dois objetos aparecem junto ao centro do movimento. | A completar pelo grupo |
-| Centro | Mesa | O tamanho do objeto varia com o tamanho da maior caixa detetada. | A completar pelo grupo |
-| Direita | Prato e copo | A velocidade da animação varia com a direção horizontal do movimento. | A completar pelo grupo |
+| Zona | Objetos | Reação na aplicação |
+|---|---|---|
+| Esquerda | Cadeira e vaso | Os dois objetos aparecem junto ao centro do movimento. 
+| Centro | Mesa | O tamanho do objeto varia com o tamanho da maior caixa detetada. 
+| Direita | Prato e copo | A velocidade da animação varia com a direção horizontal do movimento. 
 
 Cada zona tem o seu próprio evento. Depois do último movimento, o evento permanece aberto
 por 0,65 segundos. Na versão atual, as animações são desenhadas enquanto há deteção na zona.
