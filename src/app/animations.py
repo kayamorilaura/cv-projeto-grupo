@@ -58,23 +58,23 @@ def render_zone(
         # Each zone has its own layout and animation response.
         if zone_index == 0:
             if obj_index == 0:
-                position = (center[0] - 40, center[1])
-                side = 200
+                position = (center[0] - 70, center[1])
+                side = 260
             else:
-                position = (center[0] + 52, center[1])
-                side = 200
+                position = (center[0] + 70, center[1])
+                side = 240
             speed = 24
         elif zone_index == 1:
             position = center
-            side = min(235, max(100, int(extent * 0.95)))
+            side = min(320, max(150, int(extent * 1.2)))
             speed = 24
         else:
             if obj_index == 0:
-                position = (center[0] - 38, center[1])
-                side = 150
+                position = (center[0] - 65, center[1])
+                side = 220
             else:
-                position = (center[0] + 43, center[1])
-                side = 120
+                position = (center[0] + 65, center[1])
+                side = 180
             if direction > 0:
                 speed = 35
             elif direction < 0:
